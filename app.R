@@ -33,7 +33,7 @@ body <- dashboardBody(
     tabItem(tabName = "feedback",
             h2("Provide Feedback for a Listing"),
             fluidRow(
-              column(12,
+              column(6,
                      textInput("text1", "Listing ID"),
                      sliderInput("slider1", "How safe did you feel during your stay?", min = 0, max = 10, value = 5),
                      sliderInput("slider2", "How safe did you feel about the neighborhood?", min = 0, max = 10, value = 5),
@@ -41,9 +41,12 @@ body <- dashboardBody(
                                   choices = c("Yes" = "Yes", "No" = "No"),
                                   selected = "No"
                                                ),  
-                     textAreaInput("caption", "Brief Feedback", width = "500px"),
+                     textAreaInput("textarea1", "Brief FeedBack", width = "500px"),
                      verbatimTextOutput("value"),
                      actionButton("submit", "Submit" ,class = "btn-danger",style="color:white")
+              ),
+              column(6,
+                     DTOutput("mytable")
               )
             ),
             
@@ -67,7 +70,39 @@ shinyApp(
     controlbar = dashboardControlbar(collapsed = FALSE, skinSelector()),
 
   ),
-  server = function(input, output) {
+  # Define the server logic
+  server <- function(input, output, session) {
+    # Reactive variable to store data for the DataTable
+    data <- reactiveVal(data.frame(Slider1 = numeric(0), 
+                                   Slider2 = numeric(0),
+                                   Textarea1 = character(0), 
+                                   Radio = character(0)))
     
+    # Observe the submit button click event
+    observeEvent(input$submit, {
+      # Get the inputs from the UI
+      slider1 <- input$slider1
+      slider2 <- input$slider2
+      textarea1 <- input$textarea1
+      radio1 <- input$radio1
+      
+      # Create a new row of data
+      new_row <- data.frame(Slider1 = slider1, 
+                            Slider2 = slider2,
+                            Textarea1 = textarea1,
+                            Radio = radio1)
+      
+      # Add the new row to the existing data
+      current_data <- data()  # Get current data
+      updated_data <- rbind(current_data, new_row)  # Add new row to the data
+      
+      # Update the reactive variable with the new data
+      data(updated_data)
+    })
+    
+    # Render the DataTable with the stored data
+    output$mytable <- renderDT({
+      datatable(data())
+    })
   }
 )
