@@ -57,7 +57,10 @@ body <- dashboardBody(
             background-color: #F15B5F!important;
           }
           
-          
+          .custom-h3 {
+          font-weight: bold;  # Extra bold
+          color: #FF5733;  # Change color if desired
+          }
         
          .leaflet-container {
           padding: 10px; 
@@ -86,14 +89,12 @@ body <- dashboardBody(
 #-------------------------------Tab 3 UI Code ----------------------------------
     tabItem(tabName = "feedback",
             h2("Provide Feedback for a Listing"),
-        
-              
-          
             fluidRow(
-              column(6,leafletOutput("map",height = "500px")),
+              column(6,leafletOutput("map3",height = "700px")),
       # Feedback Form-----------------------------------------------------------
               column(6,
-                     textInput("text1", "Listing ID"),
+                     h4("ID: Select the listing where you stayed",class = "custom-h3"),
+                     uiOutput("marker_info"),
                      sliderInput("slider1", "How safe did you feel during your stay?", min = 0, max = 10, value = 5),
                      sliderInput("slider2", "How safe did you feel about the neighborhood?", min = 0, max = 10, value = 5),
                      radioButtons("radio1", "Did anything happen with you during your stay?",
@@ -102,7 +103,9 @@ body <- dashboardBody(
                                                ),  
                      textAreaInput("textarea1", "Brief FeedBack", width = "500px"),
                      verbatimTextOutput("value"),
-                     actionButton("submit", "Submit" ,class = "btn-danger",style="color:white")
+                     actionButton("submit", "Submit" ,class = "btn-danger",style="color:white"),
+                   
+                    
               ),
    
             ),
@@ -135,8 +138,8 @@ shinyApp(
 #-------------------------------Define the server logic ------------------------
   
   server <- function(input, output, session) {
-    
-    output$map <- renderLeaflet({
+#--------------- Tab  3 Leafletmap Logic ---------------------------------------
+    output$map3 <- renderLeaflet({
       leaflet() %>%
         addTiles() %>%
         addCircleMarkers(
@@ -152,12 +155,37 @@ shinyApp(
             "<br>", 
             "Room Type: <span style='color:black;'>", room_type, "</span>",
             "<br>",
-            "<img src='", picture_url, "' width='150' height='150' />"
+            "Host Identify Verified: <span style='color:black;'>", host_identity_verified, "</span>",
+            "<br>",
+            "Price: <span style='color:black;'>", price, "</span>",
+            "<br>",
+            "<img src='", picture_url,"' width='300' height='300' />",
+            "<br>"
+            
           )
         )
     })
     
-#--------------- Reactive variable to store data for the DataTable--------------
+    observeEvent(input$map3_marker_click, {
+      clicked_marker <- input$map3_marker_click
+      
+      # Find the corresponding row in the data frame
+      clicked_info <- listing_data[
+        listing_data$Latitudec == clicked_marker$lat &
+          listing_data$Longitudec == clicked_marker$lng, ]
+      
+      # Display information about the clicked marker
+      output$marker_info <- renderUI({
+        HTML(
+          paste(
+            "<h4 style='color:#F15B5F; font-weight:bold'>", clicked_info$id, "</h3>"
+          )
+        )
+      })
+      
+    })
+    
+#--------------- Reactive variable to store data for the Data Table-------------
     data <- reactiveVal(data.frame(Slider1 = numeric(0), 
                                    Slider2 = numeric(0),
                                    Textarea1 = character(0), 
@@ -188,7 +216,11 @@ shinyApp(
     
     # Render the DataTable with the stored data
     output$mytable <- renderDT({
-      datatable(data(),colnames=c("Sequence", "Safety of Listing", "Safey of Neighborhood", "Feedback", "Incident Happend?"))
+      datatable(data(),colnames=c("Sequence", 
+                                  "Safety of Listing",
+                                  "Safey of Neighborhood",
+                                  "Feedback", 
+                                  "Incident Happend?"))
     })
   }
 )
