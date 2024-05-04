@@ -6,15 +6,24 @@ library(shiny)
 library(shinydashboard)
 library(shinydashboardPlus)
 library(shinyWidgets)
+library(tidyverse)
 library(DT)
+library(leaflet)
 library(readxl)  
 
 #-------------------------------Load the Data sets------------------------------
 # Define the path
-excel_path_read <- "listings_data.xlsx"
+excel_path_listing <- "listings_data.xlsx"
+excel_path_crime <- "crime_data_subset.xlsx"
+
+# Load the data from excel
+listing_data<- read_excel(excel_path_listing, sheet = 1) 
+crime_data<- read_excel(excel_path_crime, sheet = 1) 
+
+#Extract out certain cols from Data Frames
+
 
 #-------------------------------Construct the Dashboard Sidebar-----------------
-
 sidebar <- dashboardSidebar(
   width = 350,
   sidebarMenu(
@@ -24,7 +33,6 @@ sidebar <- dashboardSidebar(
     menuItem("About", tabName = "about")
   )
 )
-
 #-------------------------------Construct the Dashboard Body--------------------
 body <- dashboardBody(
   chooseSliderSkin("Flat", color = "#F15B5F"),
@@ -47,7 +55,13 @@ body <- dashboardBody(
       
           table.dataTable tbody tr:hover, table.dataTable tbody tr:hover td {
             background-color: #F15B5F!important;
-            }
+          }
+          
+         .leaflet-container {
+          padding: 10px; 
+          margin: 10px; 
+        }
+        
           "
   ))
   ),
@@ -71,6 +85,9 @@ body <- dashboardBody(
     tabItem(tabName = "feedback",
             h2("Provide Feedback for a Listing"),
             fluidRow(
+              leafletOutput("map",height = "500px",width = "600px")
+            ),
+            fluidRow(
       # Feedback Form-----------------------------------------------------------
               column(6,
                      textInput("text1", "Listing ID"),
@@ -89,8 +106,6 @@ body <- dashboardBody(
                      DTOutput("mytable")
               )
             ),
-            
-            
     ),
 #-------------------------------Tab 4 UI Code ----------------------------------
 
@@ -102,7 +117,6 @@ body <- dashboardBody(
 
 
 # Construct the dashboard app
-
 shinyApp(
   ui = dashboardPage(
     header =dashboardHeader(title = "Safe Airbnb"),
@@ -112,9 +126,25 @@ shinyApp(
     #controlbar = dashboardControlbar(collapsed = FALSE, skinSelector()),
 
   ),
-  # Define the server logic
+#-------------------------------Define the server logic ------------------------
+  
   server <- function(input, output, session) {
-    # Reactive variable to store data for the DataTable
+    
+    output$map <- renderLeaflet({
+      leaflet() %>%
+        addTiles() %>%
+        addCircleMarkers(
+          data = listing_data,
+          lat = ~Latitudec,
+          lng = ~Longitudec,
+          radius = 2,
+          color = "#F15B5F",
+          stroke = TRUE,
+          fillOpacity = 0.5
+        )
+    })
+    
+#--------------- Reactive variable to store data for the DataTable--------------
     data <- reactiveVal(data.frame(Slider1 = numeric(0), 
                                    Slider2 = numeric(0),
                                    Textarea1 = character(0), 
@@ -145,7 +175,7 @@ shinyApp(
     
     # Render the DataTable with the stored data
     output$mytable <- renderDT({
-      datatable(data())
+      datatable(data(),colnames=c("Sequence", "Safety of Listing", "Safey of Neighborhood", "Feedback", "Incident Happend?"))
     })
   }
 )
