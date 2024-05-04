@@ -2,15 +2,20 @@
 rm(list=ls())
 
 #-------------------------------Load the Libraries------------------------------
+# Shiny Specific Libraries
 library(shiny)
 library(shinydashboard)
 library(shinydashboardPlus)
 library(shinyWidgets)
+
+# Other Libraries
+library(readxl)  
 library(tidyverse)
 library(DT)
+library(sortable)
 library(flexdashboard)
 library(leaflet)
-library(readxl)  
+
 
 #-------------------------------Load the Data sets------------------------------
 # Define the path
@@ -92,18 +97,61 @@ body <- dashboardBody(
     
     tabItem(tabName = "crime",
             h2("Visualize Crime Rate by Category"),
+#-------------------------------Gauge Chart Code--------------------------------
             fluidRow(
             column(4, gaugeOutput("gauge1")),
             column(4, gaugeOutput("gauge2")),
             column(4, gaugeOutput("gauge3"))
             ),
             fluidRow(
-              
-              column(4,style = "text-align: center;",h3("Violent Crime Index",class = "custom-h3")),
-              column(4,style = "text-align: center;",h3("Non-Violent Crime Index",class = "custom-h3")),
-              column(4,style = "text-align: center;",h3("Petty Crime Index",class = "custom-h3"))
-              
+              column(4,style = "text-align: center;",
+                     h3("Violent Crime Index",class = "custom-h3")),
+              column(4,style = "text-align: center;",
+                     h3("Non-Violent Crime Index",class = "custom-h3")),
+              column(4,style = "text-align: center;",
+                     h3("Petty Crime Index",class = "custom-h3"))
+            ),
+#-----------------------------Drag and Sortable List----------------------------
+      fluidRow(
+        column(
+          width = 12,
+          bucket_list(
+            header = "Drag and Drop",
+            group_name = "bucket_list_group",
+            orientation = "horizontal",
+            add_rank_list(
+              text = "Violent Crimes",
+              labels = list(
+                "one",
+                "two",
+                "three",
+                htmltools::tags$div(
+                  htmltools::em("Complex"), " html tag without a name"
+                ),
+                "five" = htmltools::tags$div(
+                  htmltools::em("Complex"), " html tag with name: 'five'"
+                )
+              ),
+              input_id = "rank_list_1"
+            ),
+            add_rank_list(
+              text = "Non-Violent Crimes",
+              labels = NULL,
+              input_id = "rank_list_2"
+            ),
+            add_rank_list(
+              text = "Petty Crimes",
+              labels = NULL,
+              input_id = "rank_list_3"
+            ),
+            add_rank_list(
+              text = "Excluded Crimes",
+              labels = NULL,
+              input_id = "rank_list_4"
             )
+          )
+        )
+      ),
     ),
 
 #-------------------------------Tab 3 UI Code ----------------------------------
