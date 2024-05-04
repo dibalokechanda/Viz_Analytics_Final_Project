@@ -57,10 +57,12 @@ body <- dashboardBody(
             background-color: #F15B5F!important;
           }
           
+          
+        
          .leaflet-container {
           padding: 10px; 
           margin: 10px; 
-        }
+          }
         
           "
   ))
@@ -84,10 +86,11 @@ body <- dashboardBody(
 #-------------------------------Tab 3 UI Code ----------------------------------
     tabItem(tabName = "feedback",
             h2("Provide Feedback for a Listing"),
+        
+              
+          
             fluidRow(
-              leafletOutput("map",height = "500px",width = "600px")
-            ),
-            fluidRow(
+              column(6,leafletOutput("map",height = "500px")),
       # Feedback Form-----------------------------------------------------------
               column(6,
                      textInput("text1", "Listing ID"),
@@ -101,11 +104,14 @@ body <- dashboardBody(
                      verbatimTextOutput("value"),
                      actionButton("submit", "Submit" ,class = "btn-danger",style="color:white")
               ),
-    # DT Table -----------------------------------------------------------------
-              column(6,
-                     DTOutput("mytable")
-              )
+   
             ),
+      
+           fluidRow( # DT Table -----------------------------------------------------------------
+                     column(6,
+                            DTOutput("mytable")
+                     )
+                     )
     ),
 #-------------------------------Tab 4 UI Code ----------------------------------
 
