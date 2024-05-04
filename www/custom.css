@@ -4,3 +4,30 @@
     font-size: 24px;
   }
   .main-sidebar { font-size: 20px; }
+
+  
+  .rank-list-title{
+    color:red;
+    font-weight: bold;
+    font-size:18px
+ }
+
+.rank-list-item{
+    font-size:14px
+}
+
+.default-sortable .rank-list-item.sortable-chosen, .default-sortable .rank-list-item.sortable-ghost.sortable-chosen, 
+.default-sortable .rank-list-item.sortable-drag{
+    background-color: red;
+    color:white;
+    border: 1px solid red;
+}
+
+.default-sortable .rank-list-item:hover:not(.disabled) {
+  background-color: #FF5733;
+  color:white;
+  cursor: grab;
+}
+.default-sortable .rank-list-item.sortable-ghost {
+  color: transparent;
+}

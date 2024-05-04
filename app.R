@@ -53,16 +53,16 @@ body <- dashboardBody(
   tags$head(tags$style(HTML(
           "table.dataTable tbody tr.selected td,
           table.dataTable tbody td.selected {
-                border-top-color: white !important;
-                box-shadow: inset 0 0 0 9999px #F15B5F !important;
+            border-top-color: white !important;
+            box-shadow: inset 0 0 0 9999px #F15B5F !important;
             }
       
           table.dataTable tbody tr:active td {
-                background-color: #F15B5F !important;
+            background-color: #F15B5F !important;
             }
       
           :root {
-          --dt-row-selected: transparent !important;
+             --dt-row-selected: transparent !important;
             }
       
           table.dataTable tbody tr:hover, table.dataTable tbody tr:hover td {
@@ -70,22 +70,47 @@ body <- dashboardBody(
           }
           
           .custom-h5 {
-          font-weight: bold;  
-          color: #FF5733;  
+            font-weight: bold;  
+            color: #FF5733;  
           }
           
           .custom-h3 {
-          font-weight: bold;  
-          color: black;
-          padding: 0;
-          margin: 0;
+            font-weight: bold;  
+            color: black;
+            padding: 0;
+            margin: 0;
           }
         
          .leaflet-container {
-          padding: 10px; 
-          margin: 10px; 
-          }
+            padding: 10px; 
+            margin: 10px; 
+         }
+         
+         .rank-list-title{
+            color:red;
+            font-weight: bold;
+            font-size:18px
+         }
+      
+        .rank-list-item{
+            font-size:14px
+        }
         
+        .default-sortable .rank-list-item.sortable-chosen, .default-sortable .rank-list-item.sortable-ghost.sortable-chosen, 
+        .default-sortable .rank-list-item.sortable-drag{
+            background-color: red;
+            color:white;
+            border: 1px solid red;
+        }
+        
+      .default-sortable .rank-list-item:hover:not(.disabled) {
+          background-color: #FF5733;
+          color:white;
+          cursor: grab;
+      }
+      .default-sortable .rank-list-item.sortable-ghost {
+          color: transparent;
+      }
           "
   ))
   ),
