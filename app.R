@@ -20,6 +20,27 @@ sidebar <- dashboardSidebar(
 # Construct DashBoard Body
 body <- dashboardBody(
   chooseSliderSkin("Flat", color = "#F15B5F"),
+  tags$head(tags$style(HTML(
+          "table.dataTable tbody tr.selected td,
+          table.dataTable tbody td.selected {
+                border-top-color: white !important;
+                box-shadow: inset 0 0 0 9999px #F15B5F !important;
+            }
+      
+          table.dataTable tbody tr:active td {
+                background-color: #F15B5F !important;
+            }
+      
+          :root {
+          --dt-row-selected: transparent !important;
+            }
+      
+          table.dataTable tbody tr:hover, table.dataTable tbody tr:hover td {
+            background-color: #F15B5F!important;
+            }
+"
+  ))
+  ),
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
   ),
@@ -67,7 +88,7 @@ shinyApp(
     sidebar=sidebar,
     body=body,
     skin = "red",
-    controlbar = dashboardControlbar(collapsed = FALSE, skinSelector()),
+    #controlbar = dashboardControlbar(collapsed = FALSE, skinSelector()),
 
   ),
   # Define the server logic
@@ -89,6 +110,7 @@ shinyApp(
       # Create a new row of data
       new_row <- data.frame(Slider1 = slider1, 
                             Slider2 = slider2,
+        
                             Textarea1 = textarea1,
                             Radio = radio1)
       
