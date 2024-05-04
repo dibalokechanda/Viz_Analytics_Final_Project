@@ -206,6 +206,13 @@ body <- dashboardBody(
           )
         )
       ),
+    fluidRow(
+      column(1),
+      column(3,h2("Specify Date Range",class = "custom-h2")),
+      column(8,uiOutput('ui_big')
+          
+      )
+    )
     ),
 
 #-------------------------------Tab 3 UI Code ----------------------------------
@@ -257,6 +264,23 @@ shinyApp(
   
   server <- function(input, output, session) {
     
+#-----------------------Date Picker---------------------------------------------
+    output$ui_big <- renderUI({
+      tagList(
+        tags$style(type = 'text/css', '#big_slider .irs-grid-text {font-size: 20px}'), 
+        div(id = 'big_slider',
+            sliderInput(
+              width = 800,
+              "dateRange",  # Input ID
+              label = "",  # Slider label
+              min = min(crime_data$Date),  # Minimum date
+              max = max(crime_data$Date),  # Maximum date
+              value = c(min(crime_data$Date), max(crime_data$Date)),  # Default range
+              timeFormat = "%B %Y"   # Date format
+            ),  
+        )#div close
+      )#taglst close
+    })
     
 #--------------- Tab 2 Gauge Chart Logic----------------------------------------
     
@@ -279,7 +303,14 @@ shinyApp(
     }) 
     
     
-    listing_id_shared <- reactiveVal("")
+#-------------Tab 2 Drag Drop Logic---------------------------------------------
+violent_crimes_list<-reactive({input$rank_list_1}) 
+non_violent_crimes_list <-reactive({input$rank_list_2}) 
+petty_crimes_list <-reactive({input$bucket_list_group})
+
+#-----------------Reactive Value to be used in Tab 3----------------------------
+
+listing_id_shared <- reactiveVal("")
     
 #--------------- Tab  3 Clear Button Logic -------------------------------------
     observeEvent(input$clear_button, {
@@ -299,6 +330,8 @@ shinyApp(
       })
     })
 #--------------- Tab  3 Leafletmap Logic ---------------------------------------
+    
+    # Rendering Map------------------------------------------------------------
     output$map3 <- renderLeaflet({
       leaflet() %>%
         addTiles() %>%
@@ -326,6 +359,7 @@ shinyApp(
         )
     })
     
+    # Map Click Observer--------------------------------------------------------
     observeEvent(input$map3_marker_click, {
       clicked_marker <- input$map3_marker_click
       
