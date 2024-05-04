@@ -57,7 +57,7 @@ body <- dashboardBody(
             background-color: #F15B5F!important;
           }
           
-          .custom-h3 {
+          .custom-h5 {
           font-weight: bold;  # Extra bold
           color: #FF5733;  # Change color if desired
           }
@@ -93,7 +93,7 @@ body <- dashboardBody(
               column(6,leafletOutput("map3",height = "700px")),
       # Feedback Form-----------------------------------------------------------
               column(6,
-                     h4("ID: Select the listing where you stayed",class = "custom-h3"),
+                     h5("ID: Select the listing where you stayed",class = "custom-h5"),
                      uiOutput("marker_info"),
                      sliderInput("slider1", "How safe did you feel during your stay?", min = 0, max = 10, value = 5),
                      sliderInput("slider2", "How safe did you feel about the neighborhood?", min = 0, max = 10, value = 5),
@@ -102,28 +102,24 @@ body <- dashboardBody(
                                   selected = "No"
                                                ),  
                      textAreaInput("textarea1", "Brief FeedBack", width = "500px"),
-                     verbatimTextOutput("value"),
                      actionButton("submit", "Submit" ,class = "btn-danger",style="color:white"),
+                     actionButton("clear_button", "Clear" ,class = "btn-danger",style="color:white"),
                    
                     
               ),
    
             ),
-      
-           fluidRow( # DT Table -----------------------------------------------------------------
-                     column(6,
-                            DTOutput("mytable")
+      # DT Table ---------------------------------------------------------------
+           fluidRow(column(6,DTOutput("mytable")
                      )
                      )
     ),
 #-------------------------------Tab 4 UI Code ----------------------------------
-
     tabItem(tabName = "about",
             h2("About")
     )
   )
 )
-
 
 # Construct the dashboard app
 shinyApp(
@@ -138,6 +134,26 @@ shinyApp(
 #-------------------------------Define the server logic ------------------------
   
   server <- function(input, output, session) {
+    
+    listing_id_shared <- reactiveVal("")
+    
+#--------------- Tab  3 Clear Button Logic -------------------------------------
+    observeEvent(input$clear_button, {
+      # Reset the slider inputs
+      updateSliderInput(session, "slider1", value = 5)
+      updateSliderInput(session, "slider2", value = 5)
+      
+      # Reset the radio buttons
+      updateRadioButtons(session, "radio1", selected = "No")
+      
+      # Clear the text area
+      updateTextAreaInput(session, "textarea1", value = "")
+      
+      # Reset the marker_info output
+      output$marker_info <- renderText({
+        ""
+      })
+    })
 #--------------- Tab  3 Leafletmap Logic ---------------------------------------
     output$map3 <- renderLeaflet({
       leaflet() %>%
@@ -174,11 +190,12 @@ shinyApp(
         listing_data$Latitudec == clicked_marker$lat &
           listing_data$Longitudec == clicked_marker$lng, ]
       
+      listing_id_shared(clicked_info$id)
       # Display information about the clicked marker
       output$marker_info <- renderUI({
         HTML(
           paste(
-            "<h4 style='color:#F15B5F; font-weight:bold'>", clicked_info$id, "</h3>"
+            "<h5 style='color:#F15B5F; font-weight:bold'>", clicked_info$id, "</h5>"
           )
         )
       })
@@ -186,7 +203,8 @@ shinyApp(
     })
     
 #--------------- Reactive variable to store data for the Data Table-------------
-    data <- reactiveVal(data.frame(Slider1 = numeric(0), 
+    data <- reactiveVal(data.frame(ListingId=character(0),
+                                   Slider1 = numeric(0), 
                                    Slider2 = numeric(0),
                                    Textarea1 = character(0), 
                                    Radio = character(0)))
@@ -194,15 +212,18 @@ shinyApp(
     # Observe the submit button click event
     observeEvent(input$submit, {
       # Get the inputs from the UI
+      listing_id_s<-listing_id_shared()
+      
+      print(listing_id_s)
       slider1 <- input$slider1
       slider2 <- input$slider2
       textarea1 <- input$textarea1
       radio1 <- input$radio1
       
       # Create a new row of data
-      new_row <- data.frame(Slider1 = slider1, 
+      new_row <- data.frame(ListingId= listing_id_s,
+                            Slider1 = slider1, 
                             Slider2 = slider2,
-        
                             Textarea1 = textarea1,
                             Radio = radio1)
       
@@ -217,6 +238,7 @@ shinyApp(
     # Render the DataTable with the stored data
     output$mytable <- renderDT({
       datatable(data(),colnames=c("Sequence", 
+                                  "Listing ID",
                                   "Safety of Listing",
                                   "Safey of Neighborhood",
                                   "Feedback", 
