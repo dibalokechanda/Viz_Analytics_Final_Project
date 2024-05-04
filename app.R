@@ -24,7 +24,13 @@ excel_path_crime <- "crime_data_subset.xlsx"
 
 # Load the data from excel
 listing_data<- read_excel(excel_path_listing, sheet = 1) 
-crime_data<- read_excel(excel_path_crime, sheet = 1) 
+crime_data<- read_excel(excel_path_crime, sheet = 1)
+
+# Get the unique elements in the "Primary Type" column
+unique_elements <- unique(crime_data$`Primary Type`)
+
+# Display the unique elements
+print(unique_elements)
 
 #Extract out certain cols from Data Frames
 
@@ -122,26 +128,49 @@ body <- dashboardBody(
             add_rank_list(
               text = "Violent Crimes",
               labels = list(
-                "one",
-                "two",
-                "three",
-                htmltools::tags$div(
-                  htmltools::em("Complex"), " html tag without a name"
-                ),
-                "five" = htmltools::tags$div(
-                  htmltools::em("Complex"), " html tag with name: 'five'"
-                )
+               "HOMICIDE",
+               "BATTERY",
+               "ASSAULT",
+               "SEX OFFENSE",
+               "ROBBERY",
+               "CRIMINAL SEXUAL ASSAULT",
+               "INTIMIDATION",
+               "KIDNAPPING",
+               "STALKING"
               ),
               input_id = "rank_list_1"
             ),
             add_rank_list(
               text = "Non-Violent Crimes",
-              labels = NULL,
+              labels = list(
+                "THEFT",
+                "MOTOR VEHICLE THEFT",
+                "BURGLARY",
+                "DECEPTIVE PRACTICE",
+                "CRIMINAL DAMAGE",
+                "NARCOTICS",
+                "OFFENSE INVOLVING CHILDREN",
+                "CRIMINAL TRESPASS",
+                "WEAPONS VIOLATION",
+                "ARSON",
+                "INTERFERENCE WITH PUBLIC OFFICER",
+                "LIQUOR LAW VIOLATION",
+                "HUMAN TRAFFICKING"
+              ),
               input_id = "rank_list_2"
             ),
             add_rank_list(
               text = "Petty Crimes",
-              labels = NULL,
+              labels = list(
+                "OTHER OFFENSE",
+                "PUBLIC PEACE VIOLATION",
+                "CONCEALED CARRY LICENSE VIOLATION",
+                "OBSCENITY",
+                "GAMBLING",
+                "PUBLIC INDECENCY",
+                "PROSTITUTION",
+                "NON-CRIMINAL"
+              ),
               input_id = "rank_list_3"
             ),
             add_rank_list(
