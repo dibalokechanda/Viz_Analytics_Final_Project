@@ -8,6 +8,7 @@ library(shinydashboardPlus)
 library(shinyWidgets)
 library(tidyverse)
 library(DT)
+library(flexdashboard)
 library(leaflet)
 library(readxl)  
 
@@ -58,8 +59,15 @@ body <- dashboardBody(
           }
           
           .custom-h5 {
-          font-weight: bold;  # Extra bold
-          color: #FF5733;  # Change color if desired
+          font-weight: bold;  
+          color: #FF5733;  
+          }
+          
+          .custom-h3 {
+          font-weight: bold;  
+          color: black;
+          padding: 0;
+          margin: 0;
           }
         
          .leaflet-container {
@@ -84,6 +92,18 @@ body <- dashboardBody(
     
     tabItem(tabName = "crime",
             h2("Visualize Crime Rate by Category"),
+            fluidRow(
+            column(4, gaugeOutput("gauge1")),
+            column(4, gaugeOutput("gauge2")),
+            column(4, gaugeOutput("gauge3"))
+            ),
+            fluidRow(
+              
+              column(4,style = "text-align: center;",h3("Violent Crime Index",class = "custom-h3")),
+              column(4,style = "text-align: center;",h3("Non-Violent Crime Index",class = "custom-h3")),
+              column(4,style = "text-align: center;",h3("Petty Crime Index",class = "custom-h3"))
+              
+            )
     ),
 
 #-------------------------------Tab 3 UI Code ----------------------------------
@@ -93,7 +113,7 @@ body <- dashboardBody(
               column(6,leafletOutput("map3",height = "700px")),
       # Feedback Form-----------------------------------------------------------
               column(6,
-                     h5("ID: Select the listing where you stayed",class = "custom-h5"),
+                     h5("ID: Select the listing where you stayed (Click on the Map)",class = "custom-h5"),
                      uiOutput("marker_info"),
                      sliderInput("slider1", "How safe did you feel during your stay?", min = 0, max = 10, value = 5),
                      sliderInput("slider2", "How safe did you feel about the neighborhood?", min = 0, max = 10, value = 5),
@@ -134,6 +154,28 @@ shinyApp(
 #-------------------------------Define the server logic ------------------------
   
   server <- function(input, output, session) {
+    
+    
+#--------------- Tab 2 Gauge Chart Logic----------------------------------------
+    
+    output$gauge1 <- renderGauge({
+      gauge(100, min=0, max=100,  sectors = gaugeSectors(success = c(0.5, 1), 
+                                                        warning = c(0.3, 0.5),
+                                                        danger = c(0, 0.3)))
+    })
+    
+    output$gauge2 <- renderGauge({
+      gauge(25, min=0, max=100,  sectors = gaugeSectors(success = c(0.5, 1), 
+                                                        warning = c(0.3, 0.5),
+                                                        danger = c(0, 0.3)))
+    }) 
+    
+    output$gauge3 <- renderGauge({
+      gauge(60, min=0, max=100,  sectors = gaugeSectors(success = c(0.5, 1), 
+                                                        warning = c(0.3, 0.5),
+                                                        danger = c(0, 0.3)))
+    }) 
+    
     
     listing_id_shared <- reactiveVal("")
     
