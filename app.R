@@ -146,7 +146,14 @@ shinyApp(
           radius = 2,
           color = "#F15B5F",
           stroke = TRUE,
-          fillOpacity = 0.5
+          fillOpacity = 0.5,
+          popup = ~paste(
+            "ID: <strong style='color:#F15B5F;'>", id, "</strong>",  
+            "<br>", 
+            "Room Type: <span style='color:black;'>", room_type, "</span>",
+            "<br>",
+            "<img src='", picture_url, "' width='150' height='150' />"
+          )
         )
     })
     
