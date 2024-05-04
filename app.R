@@ -26,6 +26,12 @@ excel_path_crime <- "crime_data_subset.xlsx"
 listing_data<- read_excel(excel_path_listing, sheet = 1) 
 crime_data<- read_excel(excel_path_crime, sheet = 1)
 
+# Perfrom Preprocessing
+
+# Mutate the time stamp columns
+crime_data <- crime_data %>%
+  mutate(Date = ymd_hms(Date))  
+
 # Get the unique elements in the "Primary Type" column
 unique_elements <- unique(crime_data$`Primary Type`)
 
@@ -211,7 +217,7 @@ body <- dashboardBody(
       column(3,h2("Specify Date Range",class = "custom-h2")),
       column(8,uiOutput('ui_big')
           
-      )
+      ),
     )
     ),
 
@@ -263,25 +269,50 @@ shinyApp(
 #-------------------------------Define the server logic ------------------------
   
   server <- function(input, output, session) {
-    
-#-----------------------Date Picker---------------------------------------------
+
+#----------------------- Tab 2 Date Slider--------------------------------------
     output$ui_big <- renderUI({
       tagList(
         tags$style(type = 'text/css', '#big_slider .irs-grid-text {font-size: 20px}'), 
         div(id = 'big_slider',
             sliderInput(
               width = 800,
-              "dateRange",  # Input ID
-              label = "",  # Slider label
+              "dateRange",  
+              label = "",  
               min = min(crime_data$Date),  # Minimum date
               max = max(crime_data$Date),  # Maximum date
               value = c(min(crime_data$Date), max(crime_data$Date)),  # Default range
-              timeFormat = "%B %Y"   # Date format
+              timeFormat = "%Y-%m-%d"   # Date format
             ),  
-        )#div close
-      )#taglst close
+        )
+      )
     })
     
+#----------------------- Reactive Value of Crime Count -------------------------
+crime_counts_date_subsetted_data<- reactiveVal("")    
+
+#----------------------- Tab 2 Date Slider Subsetting Logic---------------------
+    observeEvent(input$dateRange, {
+      # Get the selected date range
+      subset_date_range <- input$dateRange
+
+      # Subset the data frame to the selected date range
+      crime_data_filtered <- crime_data %>%
+        filter(Date >= subset_date_range[1] & Date <= subset_date_range[2])
+      
+      
+      # Count the occurrences of each crime type
+      crime_type_counts <- crime_data_filtered %>%
+        count(`Primary Type`)
+      
+      crime_counts_date_subsetted_data(crime_type_counts)
+      })
+
+#-------------Tab 2 Drag Drop Logic---------------------------------------------
+violent_crimes_list<-reactive({input$rank_list_1}) 
+non_violent_crimes_list <-reactive({input$rank_list_2}) 
+petty_crimes_list <-reactive({input$bucket_list_group})
+
 #--------------- Tab 2 Gauge Chart Logic----------------------------------------
     
     output$gauge1 <- renderGauge({
@@ -303,10 +334,7 @@ shinyApp(
     }) 
     
     
-#-------------Tab 2 Drag Drop Logic---------------------------------------------
-violent_crimes_list<-reactive({input$rank_list_1}) 
-non_violent_crimes_list <-reactive({input$rank_list_2}) 
-petty_crimes_list <-reactive({input$bucket_list_group})
+
 
 #-----------------Reactive Value to be used in Tab 3----------------------------
 
