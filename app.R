@@ -1,12 +1,20 @@
-# Load the Libraries
+# Clear the work space
+rm(list=ls())
+
+#-------------------------------Load the Libraries------------------------------
 library(shiny)
 library(shinydashboard)
 library(shinydashboardPlus)
 library(shinyWidgets)
 library(DT)
+library(readxl)  
 
+#-------------------------------Load the Data sets------------------------------
+# Define the path
+excel_path_read <- "listings_data.xlsx"
 
-# Construct the Dashboard Sidebar
+#-------------------------------Construct the Dashboard Sidebar-----------------
+
 sidebar <- dashboardSidebar(
   width = 350,
   sidebarMenu(
@@ -17,9 +25,11 @@ sidebar <- dashboardSidebar(
   )
 )
 
-# Construct DashBoard Body
+#-------------------------------Construct the Dashboard Body--------------------
 body <- dashboardBody(
   chooseSliderSkin("Flat", color = "#F15B5F"),
+  
+  #-------------------------------Custom CSS -----------------------------------
   tags$head(tags$style(HTML(
           "table.dataTable tbody tr.selected td,
           table.dataTable tbody td.selected {
@@ -38,22 +48,30 @@ body <- dashboardBody(
           table.dataTable tbody tr:hover, table.dataTable tbody tr:hover td {
             background-color: #F15B5F!important;
             }
-"
+          "
   ))
   ),
   tags$head(
     tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
   ),
+  
+#-------------------------------Tab 1 UI Code ----------------------------------
   tabItems(
     tabItem(tabName = "listing",
             h2("Listing Information and Crime Density")
     ),
+    
+#-------------------------------Tab 2 UI Code ----------------------------------
+    
     tabItem(tabName = "crime",
             h2("Visualize Crime Rate by Category"),
     ),
+
+#-------------------------------Tab 3 UI Code ----------------------------------
     tabItem(tabName = "feedback",
             h2("Provide Feedback for a Listing"),
             fluidRow(
+      # Feedback Form-----------------------------------------------------------
               column(6,
                      textInput("text1", "Listing ID"),
                      sliderInput("slider1", "How safe did you feel during your stay?", min = 0, max = 10, value = 5),
@@ -66,6 +84,7 @@ body <- dashboardBody(
                      verbatimTextOutput("value"),
                      actionButton("submit", "Submit" ,class = "btn-danger",style="color:white")
               ),
+    # DT Table -----------------------------------------------------------------
               column(6,
                      DTOutput("mytable")
               )
@@ -73,6 +92,8 @@ body <- dashboardBody(
             
             
     ),
+#-------------------------------Tab 4 UI Code ----------------------------------
+
     tabItem(tabName = "about",
             h2("About")
     )
