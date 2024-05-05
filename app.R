@@ -70,7 +70,7 @@ body <- dashboardBody(
           
           .custom-h5 {
             font-weight: bold;  
-            color: #FF5733;  
+            color: black;  
           }
           
           .custom-h3 {
