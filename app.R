@@ -136,49 +136,47 @@ body <- dashboardBody(
             HTML("<br><br><br><br>"),
             fluidRow(column(4, # Slider for review_scores_cleanliness
                             sliderInput(
-                              "cleanliness",  # Input ID
-                              "Review Scores - Cleanliness:",  # Label
-                              min = 1,  # Minimum value
-                              max = 5,  # Maximum value
-                              value = 3,  # Default value
-                              step = 0.5  # Step size for the slider
+                              "cleanliness", 
+                              "Review Scores - Cleanliness:",  
+                              min = 1, 
+                              max = 5,  
+                              value = 3, 
+                              step = 0.5 
                             ),
-                            
                             # Slider for review_scores_checkin
                             sliderInput(
-                              "checkin",  # Input ID
+                              "checkin",  
                               "Review Scores - Check-in:",
                               min = 1,
                               max = 5,
-                              value = 3,  # Default value
-                              step = 0.5  # Step size
+                              value = 3,  
+                              step = 0.5  
                             ),
-                            
                             # Slider for review_scores_communication
                             sliderInput(
-                              "communication",  # Input ID
+                              "communication",  
                               "Review Scores - Communication:",
                               min = 1,
                               max = 5,
-                              value = 3,  # Default value
-                              step = 0.5  # Step size
+                              value = 3,  
+                              step = 0.5 
                             ),
-                            
                             # Slider for price
                             sliderInput(
-                              "price",  # Input ID
+                              "price",  
                               "Price Range:",
                               min = 7,
-                              max = 99998,
-                              value = c(7, 99998),  # Default range
-                              step = 1000  # Step size
+                              max = 6000,
+                              value = c(7, 5000),  
+                              step = 5 
                             ),
                             checkboxGroupInput(
-                              "roomTypes",  # Input ID
-                              "Select Room Types:",  # Label
-                              choices = c("Shared room", "Entire home/apt", "Private room", "Hotel room"),  # Options
-                              selected = c("Private room", "Entire home/apt")  # Default selected options
-                            )
+                              "roomTypes",  
+                              "Select Room Types:", 
+                              choices = c("Shared room", "Entire home/apt", "Private room", "Hotel room"),  
+                              selected = c("Shared room", "Entire home/apt", "Private room", "Hotel room")  
+                            ),
+                            #DTOutput("filteredTable") 
             ),
                      column(8, 
                             
@@ -334,6 +332,25 @@ shinyApp(
 #-------------------------------Define the server logic ------------------------
 
 server <- function(input, output, session) {
+  
+  # Reactive expression to filter the data frame based on user inputs
+  filtered_data <- reactive({
+    listing_data %>%
+      filter(
+        review_scores_cleanliness >= input$cleanliness,
+        review_scores_checkin >= input$checkin,
+        review_scores_communication >= input$communication,
+        price >= input$price[1] & price <= input$price[2],
+        room_type %in% input$roomTypes
+      )
+  })  
+  
+  # Render the filtered data frame in a DT table
+  output$filteredTable <- renderDT({
+    datatable(filtered_data())
+  })
+  
+#--------------------------------Tab 1 Map Logic--------------------------------
   # Path to the shapefile (adjust as needed)
   shapefile_path <- "Boundaries/geo_export_188292bb-1311-453c-8721-d582bce3f0b7.shp"
   
@@ -358,12 +375,12 @@ color_palette <- colorNumeric(palette = "OrRd", domain = chicago_areas$crime_cou
       base_map <- base_map %>%
         addPolygons(
           data = chicago_areas,
-          fillColor = ~color_palette(crime_count),  # Color based on crime count
-          color = "black",  # Border color
-          weight = 1,  # Border thickness
+          fillColor = ~color_palette(crime_count), 
+          color = "black", 
+          weight = 1,  
           fillOpacity = 0.7,
           highlight = highlightOptions(
-            weight = 2,  # Highlight border
+            weight = 2, 
             color = "red",
             fillOpacity = 0.9
           )
@@ -380,11 +397,11 @@ color_palette <- colorNumeric(palette = "OrRd", domain = chicago_areas$crime_cou
     if (input$showMarkers) {
       base_map <- base_map %>%
         addCircleMarkers(
-          data = listing_data,
+          data = filtered_data(),
           lat = ~Latitudec,
           lng = ~Longitudec,
           radius = 1,
-          color = "green",
+          color = "purple",
           stroke = TRUE,
           fillOpacity = 0.5,
           popup = ~paste(
@@ -402,12 +419,8 @@ color_palette <- colorNumeric(palette = "OrRd", domain = chicago_areas$crime_cou
           )
         )
     }
-    
-    base_map  # Return the final map with optional layers
+    base_map  
   })
-
-  
-  
 #----------------------- Tab 2 Date Slider--------------------------------------
     output$ui_big <- renderUI({
       tagList(
