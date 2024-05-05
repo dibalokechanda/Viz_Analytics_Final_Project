@@ -24,6 +24,7 @@ library(sortable)
 library(flexdashboard)
 library(leaflet)
 library(ggthemes)
+library(sf)
 
 # Suppress Warning
 
@@ -33,11 +34,12 @@ options(warn=-1)
 # Define the path
 excel_path_listing <- "listings_data.xlsx"
 excel_path_crime <- "crime_data_subset.xlsx"
+excel_path_crime_count_by_area <- "crime_data_by_area.xlsx"
 
 # Load the data from excel
 listing_data<- read_excel(excel_path_listing, sheet = 1) 
 crime_data<- read_excel(excel_path_crime, sheet = 1)
-
+crime_data_area_code<- read_excel(excel_path_crime_count_by_area, sheet = 1)
 #---------------------------Perform Pre-processing------------------------------
 
 # Mutate the time stamp columns
@@ -132,8 +134,53 @@ body <- dashboardBody(
     tabItem(tabName = "listing",
             h2("Listing Information and Crime Density"),
             HTML("<br><br><br><br>"),
-            fluidRow(column(6),
-                     column(6, 
+            fluidRow(column(4, # Slider for review_scores_cleanliness
+                            sliderInput(
+                              "cleanliness",  # Input ID
+                              "Review Scores - Cleanliness:",  # Label
+                              min = 1,  # Minimum value
+                              max = 5,  # Maximum value
+                              value = 3,  # Default value
+                              step = 0.5  # Step size for the slider
+                            ),
+                            
+                            # Slider for review_scores_checkin
+                            sliderInput(
+                              "checkin",  # Input ID
+                              "Review Scores - Check-in:",
+                              min = 1,
+                              max = 5,
+                              value = 3,  # Default value
+                              step = 0.5  # Step size
+                            ),
+                            
+                            # Slider for review_scores_communication
+                            sliderInput(
+                              "communication",  # Input ID
+                              "Review Scores - Communication:",
+                              min = 1,
+                              max = 5,
+                              value = 3,  # Default value
+                              step = 0.5  # Step size
+                            ),
+                            
+                            # Slider for price
+                            sliderInput(
+                              "price",  # Input ID
+                              "Price Range:",
+                              min = 7,
+                              max = 99998,
+                              value = c(7, 99998),  # Default range
+                              step = 1000  # Step size
+                            ),
+                            checkboxGroupInput(
+                              "roomTypes",  # Input ID
+                              "Select Room Types:",  # Label
+                              choices = c("Shared room", "Entire home/apt", "Private room", "Hotel room"),  # Options
+                              selected = c("Private room", "Entire home/apt")  # Default selected options
+                            )
+            ),
+                     column(8, 
                             
                             checkboxInput("showChoropleth", "Show Choropleth Map", value = TRUE),  # Toggle choropleth
                             checkboxInput("showMarkers", "Show Circle Markers", value = TRUE),  # Toggle circle markers
@@ -165,8 +212,9 @@ body <- dashboardBody(
 
 #-------------------------------Tab 2 Date Slider ------------------------------
 fluidRow(
-  column(4),
-  column(8,uiOutput('ui_big')
+  column(1),
+  column(10,uiOutput('ui_big'),
+  column(1)
   ),
   
 #-----------------------------Drag and Sortable List----------------------------
@@ -293,8 +341,8 @@ server <- function(input, output, session) {
   chicago_areas <- st_read(shapefile_path)
   
   crime_data1 <- data.frame(
-    area_numbe = as.character(1:77),  # Unique area numbers
-    crime_count = sample(50:500, 77, replace = TRUE)  # Random counts for each area
+    area_numbe = as.character(crime_data_area_code$area_numbe),  # Unique area numbers
+    crime_count = crime_data_area_code$crime_count  # Random counts for each area
   )
   
   chicago_areas <- chicago_areas %>%
@@ -366,7 +414,7 @@ color_palette <- colorNumeric(palette = "OrRd", domain = chicago_areas$crime_cou
         tags$style(type = 'text/css', '#big_slider .irs-grid-text {font-size: 20px}'), 
         div(id = 'big_slider',
             sliderInput(
-              width = 800,
+              width = 1800,
               "dateRange",  
               label = "",  
               min = min(crime_data$Date),  # Minimum date
