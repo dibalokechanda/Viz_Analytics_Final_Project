@@ -25,6 +25,7 @@ library(flexdashboard)
 library(leaflet)
 library(ggthemes)
 library(sf)
+library(bslib)
 
 # Suppress Warning
 
@@ -314,7 +315,49 @@ fluidRow(
     ),
 #-------------------------------Tab 4 UI Code ----------------------------------
     tabItem(tabName = "about",
-            h2("About")
+            h2("About the App"),
+            HTML("<br><br>"),
+            box(
+              title = "Information", status = "danger", solidHeader = TRUE,
+              "Author: Dibaloke Chanda", br(), "Developed for:  Visual Analytics Course|Spring 2024 ",
+              br(),
+              "Platform: Rshiny",br(),
+              tags$a(
+                href = "https://github.com/dibalokechanda/Viz_Analytics_Final_Project/tree/main", 
+                "Source Code", 
+                target = "_blank" # Open in a new tab
+              )
+              
+            ),
+            
+        
+            box(
+              title = "Purpose of the App", status = "danger", solidHeader = TRUE,
+              "This is an app developed in RShiny named 'SafeAirbnb'. The app allows Airbnb guests to look up crime rates near an Airbnb listing and provides different filters like time range and category of crimes for more granular controls. Additionally, users can provide feedback related to the safety of the listing and the neighborhood around the listing where they stayed through a simple survey mechanism."
+            ),
+            box(
+              title = "Dataset", status = "danger", solidHeader = TRUE,
+              p("The Crime Dataset is from Chicago Data Portal. It contains Crime Data in the Chicago are from 2023 to Februrary 2024"),
+              tags$a(
+                href = "https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2/about_data", 
+                "Chicago Crime Dataset", 
+                target = "_blank" # Open in a new tab
+              ),
+              p("The shape files are also downloaded from Chicago Data Portal."),
+              tags$a(
+                href = "https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Community-Areas-current-/cauq-8yn6", 
+                "Chicago Shape File Link", 
+                target = "_blank" # Open in a new tab
+              ),
+              p("The Airbnb Dataset is Downloaded from Inside Airbnb."),
+              tags$a(
+                href = "https://insideairbnb.com/get-the-data", 
+                "Inside Airbnb", 
+                target = "_blank" # Open in a new tab
+              )
+              
+            )
+            
     )
   )
 )
