@@ -1,7 +1,5 @@
-# Viz_Analytics_Final_Project
-
 # Visual Analytics | Spring 2024 
 
+> This is the github repo which contains the code of the final project  
 
-
-![Logo](logo.png | width=100)
+<img src="logo.png" width="100" height="100">

@@ -1,3 +1,7 @@
+# Author : Dibaloke Chanda
+# Course: Visual Analytics | Spring 2024
+# Final Project 
+
 # Clear the work space
 rm(list=ls())
 
@@ -17,7 +21,6 @@ library(sortable)
 library(flexdashboard)
 library(leaflet)
 library(ggthemes)
-
 
 #-------------------------------Load the Data sets------------------------------
 # Define the path
