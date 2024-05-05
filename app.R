@@ -11,6 +11,7 @@ library(shinyWidgets)
 # Other Libraries
 library(readxl)  
 library(tidyverse)
+library(ggplot2)
 library(DT)
 library(sortable)
 library(flexdashboard)
@@ -139,6 +140,13 @@ body <- dashboardBody(
               column(4,style = "text-align: center;",
                      h3("Petty Crime Index",class = "custom-h3"))
             ),
+
+#-------------------------------Tab 2 Date Slider ------------------------------
+fluidRow(
+  column(4),
+  column(8,uiOutput('ui_big')
+  ),
+  
 #-----------------------------Drag and Sortable List----------------------------
       fluidRow(
         column(
@@ -203,13 +211,7 @@ body <- dashboardBody(
           )
         )
       ),
-#-------------------------------Tab 2 Date Slider ------------------------------
-    fluidRow(
-      column(1),
-      column(3,h2("Specify Date Range",class = "custom-h2")),
-      column(8,uiOutput('ui_big')
-      ),
-    )
+    ),
     ),
 
 #-------------------------------Tab 3 UI Code ----------------------------------
@@ -302,24 +304,62 @@ crime_counts_date_subsetted_data<- reactiveVal("")
 #-------------Tab 2 Drag Drop Logic---------------------------------------------
 violent_crimes_list<-reactive({input$rank_list_1}) 
 non_violent_crimes_list <-reactive({input$rank_list_2}) 
-petty_crimes_list <-reactive({input$bucket_list_group})
+petty_crimes_list <-reactive({input$rank_list_3})
 
-#--------------- Tab 2 Gauge Chart Logic----------------------------------------
+
+#--------------- Tab 2 Gauge Chart Value Logic----------------------------------
+
+crime_percentages <- reactive({
+  # Total crime count
+  total_crime_count <- sum(crime_counts_date_subsetted_data()$n)
+  
+  # Compute violent crime percentage
+  violent_crime_percentage <- crime_counts_date_subsetted_data() %>%
+    filter(`Primary Type` %in% violent_crimes_list()) %>%
+    summarize(percentage = (sum(n) / total_crime_count) * 100) %>%
+    .$percentage
+  
+  # Compute non-violent crime percentage
+  non_violent_crime_percentage <- crime_counts_date_subsetted_data() %>%
+    filter(`Primary Type` %in% non_violent_crimes_list()) %>%
+    summarize(percentage = (sum(n) / total_crime_count) * 100) %>%
+    .$percentage
+  
+  # Compute petty crime percentage
+  petty_crime_percentage <- crime_counts_date_subsetted_data() %>%
+    filter(`Primary Type` %in% petty_crimes_list()) %>%
+    summarize(percentage = (sum(n) / total_crime_count) * 100) %>%
+    .$percentage
+  
+  # Return a list with all three percentages
+  list(
+    violent = violent_crime_percentage,
+    non_violent = non_violent_crime_percentage,
+    petty = petty_crime_percentage
+  )
+})
+
+# Render the filtered crime counts as a table
+output$crimeScores <- renderTable({
+  crime_percentages()$violent
+})
+
+#--------------- Tab 2 Gauge Chart Render Logic---------------------------------
     
     output$gauge1 <- renderGauge({
-      gauge(100, min=0, max=100,  sectors = gaugeSectors(success = c(0.5, 1), 
+      gauge(crime_percentages()$violent, min=0, max=100,  sectors = gaugeSectors(success = c(0.5, 1), 
                                                         warning = c(0.3, 0.5),
                                                         danger = c(0, 0.3)))
     })
     
     output$gauge2 <- renderGauge({
-      gauge(25, min=0, max=100,  sectors = gaugeSectors(success = c(0.5, 1), 
+      gauge(crime_percentages()$non_violent, min=0, max=100,  sectors = gaugeSectors(success = c(0.5, 1), 
                                                         warning = c(0.3, 0.5),
                                                         danger = c(0, 0.3)))
     }) 
     
     output$gauge3 <- renderGauge({
-      gauge(60, min=0, max=100,  sectors = gaugeSectors(success = c(0.5, 1), 
+      gauge(crime_percentages()$petty, min=0, max=100,  sectors = gaugeSectors(success = c(0.5, 1), 
                                                         warning = c(0.3, 0.5),
                                                         danger = c(0, 0.3)))
     }) 
