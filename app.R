@@ -26,20 +26,11 @@ excel_path_crime <- "crime_data_subset.xlsx"
 listing_data<- read_excel(excel_path_listing, sheet = 1) 
 crime_data<- read_excel(excel_path_crime, sheet = 1)
 
-# Perfrom Preprocessing
+#---------------------------Perform Pre-processing------------------------------
 
 # Mutate the time stamp columns
 crime_data <- crime_data %>%
   mutate(Date = ymd_hms(Date))  
-
-# Get the unique elements in the "Primary Type" column
-unique_elements <- unique(crime_data$`Primary Type`)
-
-# Display the unique elements
-print(unique_elements)
-
-#Extract out certain cols from Data Frames
-
 
 #-------------------------------Construct the Dashboard Sidebar-----------------
 sidebar <- dashboardSidebar(
@@ -212,11 +203,11 @@ body <- dashboardBody(
           )
         )
       ),
+#-------------------------------Tab 2 Date Slider ------------------------------
     fluidRow(
       column(1),
       column(3,h2("Specify Date Range",class = "custom-h2")),
       column(8,uiOutput('ui_big')
-          
       ),
     )
     ),
