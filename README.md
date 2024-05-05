@@ -19,4 +19,20 @@ git clone https://github.com/dibalokechanda/Viz_Analytics_Final_Project.git
 ```
 
 
+# Packages Required
 
+
+Install required packages with the following command
+
+```R
+if (!require(shiny)) install.packages("shiny")
+if (!require(shinydashboard)) install.packages("shinydashboard")
+if (!require(shinydashboardPlus)) install.packages("shinydashboardPlus")
+if (!require(shinyWidgets)) install.packages("shinyWidgets")
+
+if (!require(readxl)) install.packages("readxl")
+if (!require(tidyverse)) install.packages("tidyverse")
+if (!require(ggplot2)) install.packages("ggplot2")
+if (!require(DT)) install.packages("DT")
+if (!require(sortable)) install
+```
