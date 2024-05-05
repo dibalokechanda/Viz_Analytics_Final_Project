@@ -16,6 +16,7 @@ library(DT)
 library(sortable)
 library(flexdashboard)
 library(leaflet)
+library(ggthemes)
 
 
 #-------------------------------Load the Data sets------------------------------
@@ -126,6 +127,7 @@ body <- dashboardBody(
     
     tabItem(tabName = "crime",
             h2("Visualize Crime Rate by Category"),
+            HTML("<br><br><br><br>"),
 #-------------------------------Gauge Chart Code--------------------------------
             fluidRow(
             column(4, gaugeOutput("gauge1")),
@@ -211,8 +213,21 @@ fluidRow(
           )
         )
       ),
+
+#-----------------------------Tab 2 Bar Chart Code------------------------------
+
+
+fluidRow(
+  column(2),
+  column(8,
+         plotOutput("crimeBarChart",height = "600px"), 
+         column(2))
+),
+
+
     ),
     ),
+
 
 #-------------------------------Tab 3 UI Code ----------------------------------
     tabItem(tabName = "feedback",
@@ -305,6 +320,34 @@ crime_counts_date_subsetted_data<- reactiveVal("")
 violent_crimes_list<-reactive({input$rank_list_1}) 
 non_violent_crimes_list <-reactive({input$rank_list_2}) 
 petty_crimes_list <-reactive({input$rank_list_3})
+
+
+#------------Top 5 Bar Chart Logic----------------------------------------------
+top_5_crime_counts <- reactive({
+  crime_counts_date_subsetted_data() %>%
+    arrange(desc(n)) %>%
+    slice_head(n =12)  # Select the top 5 based on "n"
+})
+
+output$crimeBarChart <- renderPlot({
+  ggplot(top_5_crime_counts(), aes(x = reorder(`Primary Type`, n), y = n)) +
+    geom_bar(stat = "identity", fill = "#FF5733") + 
+    geom_text(aes(label = n), hjust=1.5, color = "white", size = 5) +
+    coord_flip() +
+    labs(title = "Top 12 Crime Counts by Crime Type") +  # Adding the plot title
+    theme_wsj(color = "#ECF0F5",)+  
+    theme(
+      plot.title = element_text(
+        size = 30,
+        face = "bold",
+        hjust = 0.5,  # Center-align the title
+        margin = margin(b = 20)  # Add bottom margin (padding)
+      ),
+      axis.text.y = element_text(size = 14),
+      panel.background = element_rect(fill = "#ECF0F5"),  # Panel background
+      plot.background = element_rect(fill = "#ECF0F5")  # Overall plot background
+    )
+})
 
 
 #--------------- Tab 2 Gauge Chart Value Logic----------------------------------
