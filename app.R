@@ -246,8 +246,8 @@ fluidRow(
    
             ),
       # DT Table ---------------------------------------------------------------
-           fluidRow(column(6,DTOutput("mytable"))
-               )
+           fluidRow(column(6,DTOutput("mytable"),column(6, textOutput("selected_listing_id")))
+               ),
     ),
 #-------------------------------Tab 4 UI Code ----------------------------------
     tabItem(tabName = "about",
@@ -480,12 +480,12 @@ listing_id_shared <- reactiveVal("")
                                    Slider2 = numeric(0),
                                    Textarea1 = character(0), 
                                    Radio = character(0)))
-    # Observe the submit button click event
+#--------------- Tab 3 Submit Button Click Event to Update DT Table-------------
+    
+     # Observe the submit button click event
     observeEvent(input$submit, {
       # Get the inputs from the UI
       listing_id_s<-listing_id_shared()
-      
-      print(listing_id_s)
       slider1 <- input$slider1
       slider2 <- input$slider2
       textarea1 <- input$textarea1
@@ -506,14 +506,52 @@ listing_id_shared <- reactiveVal("")
       data(updated_data)
     })
     
-    # Render the DataTable with the stored data
+#----------------- Render the DataTable with the stored data--------------------
     output$mytable <- renderDT({
-      datatable(data(),colnames=c("Sequence", 
+      datatable(data(),selection = "single",colnames=c("Sequence", 
                                   "Listing ID",
                                   "Safety of Listing",
                                   "Safey of Neighborhood",
                                   "Feedback", 
                                   "Incident Happend?"))
     })
+    
+#-----------------Check Individual Feedback-------------------------------------
+    
+    # Observe click events on the DT table and update the leaflet map
+    observeEvent(input$mytable_rows_selected, {
+      selected_row <- input$mytable_rows_selected  
+      print(selected_row )
+      if (length(selected_row) > 0) {
+        # Extract the corresponding data
+        selected_listing <- listing_data[selected_row, ]
+        # Render a new leaflet map with only the selected listing
+        output$map3 <- renderLeaflet({
+          leaflet() %>%
+            addTiles() %>%
+            addCircleMarkers(
+              lat = selected_listing$Latitudec,
+              lng = selected_listing$Longitudec,
+              radius = 6,
+              color = "#FF0000",
+              stroke = TRUE,
+              fillOpacity = 0.7,
+              popup = paste(
+                "ID: <strong style='color:#F15B5F;'>", selected_listing$id, "</strong>",
+                "<br>",
+                "Room Type: <span style='color:black;'>", selected_listing$room_type, "</span>",
+                "<br>",
+                "Host Identity Verified: <span style='color:black;'>", selected_listing$host_identity_verified, "</span>",
+                "<br>",
+                "Price: <span style='color:black;'>", selected_listing$price, "</span>",
+                "<br>",
+                "<img src='", selected_listing$picture_url, "' width='300' height='300' />"
+              )
+            )
+        })
+      }
+    })
+    
+    
   }
 )
