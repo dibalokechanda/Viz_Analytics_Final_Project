@@ -5,6 +5,9 @@
 # Clear the work space
 rm(list=ls())
 
+# Suppress Warning
+options(warn=-1)
+
 #-------------------------------Load the Libraries------------------------------
 # Shiny Specific Libraries
 library(shiny)
@@ -21,6 +24,10 @@ library(sortable)
 library(flexdashboard)
 library(leaflet)
 library(ggthemes)
+
+# Suppress Warning
+
+options(warn=-1)
 
 #-------------------------------Load the Data sets------------------------------
 # Define the path
@@ -123,7 +130,17 @@ body <- dashboardBody(
 #-------------------------------Tab 1 UI Code ----------------------------------
   tabItems(
     tabItem(tabName = "listing",
-            h2("Listing Information and Crime Density")
+            h2("Listing Information and Crime Density"),
+            HTML("<br><br><br><br>"),
+            fluidRow(column(6),
+                     column(6, 
+                            
+                            checkboxInput("showChoropleth", "Show Choropleth Map", value = TRUE),  # Toggle choropleth
+                            checkboxInput("showMarkers", "Show Circle Markers", value = TRUE),  # Toggle circle markers
+                            leafletOutput("map1", height = "1000px")  # Display the leaflet map
+                            )
+            )
+            
     ),
     
 #-------------------------------Tab 2 UI Code ----------------------------------
@@ -269,7 +286,80 @@ shinyApp(
 #-------------------------------Define the server logic ------------------------
 
 server <- function(input, output, session) {
+  # Path to the shapefile (adjust as needed)
+  shapefile_path <- "Boundaries/geo_export_188292bb-1311-453c-8721-d582bce3f0b7.shp"
+  
+  # Load the shapefile
+  chicago_areas <- st_read(shapefile_path)
+  
+  crime_data1 <- data.frame(
+    area_numbe = as.character(1:77),  # Unique area numbers
+    crime_count = sample(50:500, 77, replace = TRUE)  # Random counts for each area
+  )
+  
+  chicago_areas <- chicago_areas %>%
+    left_join(crime_data1, by = "area_numbe")  # Ensure consistent data types for joining
+  
 
+color_palette <- colorNumeric(palette = "OrRd", domain = chicago_areas$crime_count)
+  
+  output$map1 <- renderLeaflet({
+    base_map <- leaflet() %>%
+      addTiles()  
+    if (input$showChoropleth) {
+      base_map <- base_map %>%
+        addPolygons(
+          data = chicago_areas,
+          fillColor = ~color_palette(crime_count),  # Color based on crime count
+          color = "black",  # Border color
+          weight = 1,  # Border thickness
+          fillOpacity = 0.7,
+          highlight = highlightOptions(
+            weight = 2,  # Highlight border
+            color = "red",
+            fillOpacity = 0.9
+          )
+        ) %>%
+        addLegend(
+          "bottomright",
+          pal = color_palette,
+          values = chicago_areas$crime_count,
+          title = "Crime Count",
+          labFormat = labelFormat(suffix = " counts")
+        )
+    }
+    
+    if (input$showMarkers) {
+      base_map <- base_map %>%
+        addCircleMarkers(
+          data = listing_data,
+          lat = ~Latitudec,
+          lng = ~Longitudec,
+          radius = 1,
+          color = "green",
+          stroke = TRUE,
+          fillOpacity = 0.5,
+          popup = ~paste(
+            "ID: <strong style='color:#F15B5F;'>", id, "</strong>",  
+            "<br>", 
+            "Room Type: <span style='color:black;'>", room_type, "</span>",
+            "<br>",
+            "Host Identify Verified: <span style='color:black;'>", host_identity_verified, "</span>",
+            "<br>",
+            "Price: <span style='color:black;'>", price, "</span>",
+            "<br>",
+            "<img src='", picture_url,"' width='300' height='300' />",
+            "<br>"
+            
+          )
+        )
+    }
+    
+    base_map  # Return the final map with optional layers
+  })
+
+  
+  
 #----------------------- Tab 2 Date Slider--------------------------------------
     output$ui_big <- renderUI({
       tagList(
@@ -305,6 +395,7 @@ crime_counts_date_subsetted_data<- reactiveVal("")
       crime_type_counts <- crime_data_filtered %>%
         count(`Primary Type`)
       
+      print(crime_data1)
       crime_counts_date_subsetted_data(crime_type_counts)
       })
 
@@ -521,7 +612,6 @@ listing_id_shared <- reactiveVal("")
     # Observe click events on the DT table and update the leaflet map
     observeEvent(input$mytable_rows_selected, {
       selected_row <- input$mytable_rows_selected  
-      print(selected_row )
       if (length(selected_row) > 0) {
         # Extract the corresponding data
         selected_listing <- listing_data[selected_row, ]
@@ -551,7 +641,5 @@ listing_id_shared <- reactiveVal("")
         })
       }
     })
-    
-    
   }
 )
