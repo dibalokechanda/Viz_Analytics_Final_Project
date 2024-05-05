@@ -1,4 +1,4 @@
-# Fina Project Code for Visual Analytics | Spring 2024 
+# Final Project Code for Visual Analytics | Spring 2024 
 
 > This is the github repo which contains the code of the final project for Visual Analytics Course in Spring 2024. 
 

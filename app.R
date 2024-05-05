@@ -218,20 +218,10 @@ fluidRow(
       ),
 
 #-----------------------------Tab 2 Bar Chart Code------------------------------
-
-
 fluidRow(
-  column(2),
-  column(8,
-         plotOutput("crimeBarChart",height = "600px"), 
-         column(2))
+  column(2),column(8,plotOutput("crimeBarChart",height = "600px"),column(2))),
 ),
-
-
-    ),
-    ),
-
-
+),
 #-------------------------------Tab 3 UI Code ----------------------------------
     tabItem(tabName = "feedback",
             h2("Provide Feedback for a Listing"),
@@ -256,9 +246,8 @@ fluidRow(
    
             ),
       # DT Table ---------------------------------------------------------------
-           fluidRow(column(6,DTOutput("mytable")
-                     )
-                     )
+           fluidRow(column(6,DTOutput("mytable"))
+               )
     ),
 #-------------------------------Tab 4 UI Code ----------------------------------
     tabItem(tabName = "about",
@@ -278,8 +267,8 @@ shinyApp(
 
   ),
 #-------------------------------Define the server logic ------------------------
-  
-  server <- function(input, output, session) {
+
+server <- function(input, output, session) {
 
 #----------------------- Tab 2 Date Slider--------------------------------------
     output$ui_big <- renderUI({
@@ -393,26 +382,26 @@ output$crimeScores <- renderTable({
 #--------------- Tab 2 Gauge Chart Render Logic---------------------------------
     
     output$gauge1 <- renderGauge({
-      gauge(crime_percentages()$violent, min=0, max=100,  sectors = gaugeSectors(success = c(0.5, 1), 
-                                                        warning = c(0.3, 0.5),
-                                                        danger = c(0, 0.3)))
+      gauge(crime_percentages()$violent, min=0, max=100,  
+            sectors = gaugeSectors(success = c(0.5, 1), 
+                                   warning = c(0.3, 0.5),
+                                   danger = c(0, 0.3)))
     })
     
     output$gauge2 <- renderGauge({
-      gauge(crime_percentages()$non_violent, min=0, max=100,  sectors = gaugeSectors(success = c(0.5, 1), 
-                                                        warning = c(0.3, 0.5),
-                                                        danger = c(0, 0.3)))
+      gauge(crime_percentages()$non_violent, min=0, max=100, 
+            sectors = gaugeSectors(success = c(0.5, 1), 
+                                   warning = c(0.3, 0.5),
+                                   danger = c(0, 0.3)))
     }) 
     
     output$gauge3 <- renderGauge({
-      gauge(crime_percentages()$petty, min=0, max=100,  sectors = gaugeSectors(success = c(0.5, 1), 
-                                                        warning = c(0.3, 0.5),
-                                                        danger = c(0, 0.3)))
+      gauge(crime_percentages()$petty, min=0, max=100, 
+            sectors = gaugeSectors(success = c(0.5, 1), 
+                                   warning = c(0.3, 0.5),
+                                   danger = c(0, 0.3)))
     }) 
     
-    
-
-
 #-----------------Reactive Value to be used in Tab 3----------------------------
 
 listing_id_shared <- reactiveVal("")
@@ -491,7 +480,6 @@ listing_id_shared <- reactiveVal("")
                                    Slider2 = numeric(0),
                                    Textarea1 = character(0), 
                                    Radio = character(0)))
-    
     # Observe the submit button click event
     observeEvent(input$submit, {
       # Get the inputs from the UI
